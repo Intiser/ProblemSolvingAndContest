@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,100 +164,44 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+double dist[105][105];
+lli dis[105][105];
+lli par[105][105];
+bool flag[105];
+
+double funct(double x1,double y1,double x2,double y2){
+    return sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
+}
+
+double X[105];
+double Y[105];
+
+void init(){
+    FORE(i,0,102){
+        FORE(j,0,102)
+            dist[i][j] = inf*1.0;
+        dist[i][i] = 0;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void floyd(int n){
+    FORE(k,1,n)
+        FORE(i,1,n)
+            FORE(j,1,n){
+                if(dist[i][j] > dist[i][k] + dist[k][j]){
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
             }
-            else
-                mnm = MIN(mnm,ret);
+}
 
-        }
-    }
-
-    return mnm;
+double maxFunct(int n){
+        double mx = 0;
+     FORE(i,1,n)
+            FORE(j,1,n){
+                if(dist[i][j]==inf) return -1;
+                mx = MAX(dist[i][j],mx);
+            }
+    return mx;
 }
 
 int main(){
@@ -265,38 +209,34 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
+   // cout<<funct(0,0,13,14)<<endl;
+    int n;
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
+    cin>>t;
     FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+        cin>>n;
+        for(int i=1;i<=n;i++){
+            cin>>X[i]>>Y[i];
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+        init();
+        FORE(i,1,n){
+            FORE(j,i+1,n){
+                //cout<<i<<" "<<j<<endl;
+                double d = funct(X[i],Y[i],X[j],Y[j]);
+                if(d<=10)
+                dist[i][j] = dist[j][i] = d ;
             }
-            else
-                prl(ag);
         }
-        else{
-            printf("No way\n");
-        }
+        floyd(n);
+        prn(cas);
+        double mxm = maxFunct(n);
+        if(mxm == -1) cout<<"Send Kurdy\n"<<endl;
+        else
+            printf("%.4lf\n\n",mxm);
     }
+
 }
+
 
 
 

@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,100 +164,61 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
+vector<int> g[105];
 
+int dfs_num[105];
+int dfs_low[105];
+int dfs_par[105];
+int ap[105];
+int root;
+int chl;
+int dcnt;
+int cnt;
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void art(int u){
+    dfs_num[u] = dfs_low[u] = dcnt++;
+    for(int i=0;i<g[u].size();i++){
+        int v = g[u][i];
+        if(dfs_num[v] == -1){
+            dfs_par[v] = u;
+            if(root == u) chl++;
+            art(v);
+            //cout<<dfs_low[v]<<" < v  u >  "<<dfs_num[u]<<endl;
+            if(dfs_low[v] >= dfs_num[u] && u!= root) {
+                ap[u] = 1;
             }
-            else
-                mnm = MIN(mnm,ret);
+            dfs_low[u] = MIN(dfs_low[u],dfs_low[v]);
+        }
+        else if(v != dfs_par[u])
+        dfs_low[u] = MIN(dfs_low[u],dfs_num[v]);
 
+    }
+}
+
+
+int all(int n){
+    CLR(dfs_low,0);
+    CLR(dfs_par,0);
+    CLR(dfs_num,-1);
+    CLR(ap,0);
+    dcnt = 0;
+    cnt = 0;
+    root = 0;
+    chl = 0;
+    for(int i=1;i<=n;i++){
+        if(dfs_num[i] == -1){
+            chl = 0;
+            root = i;
+            art(i);
+            if(chl >= 2) ap[i] = 1;
+            //cout<<cnt<<endl;
         }
     }
-
-    return mnm;
+    int c = 0;
+    for(int i=1;i<=n;i++)
+        if(ap[i] == 1) c++;
+    for(int i=0;i<=n;i++) g[i].clear();
+    return c;
 }
 
 int main(){
@@ -266,38 +227,52 @@ int main(){
         freopen("out.txt","w",stdout);
     #endif
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    int n;
+    string s;
+    while(cin>>n){
+        if(n == 0) break;
+        cin.ignore();
+        while(getline(cin,s)){
+            if(s == "0") break ;
+            int u = 0;
+            int st;
+            //cout<<u<<endl;
+            u = s[0] - '0';
+            st = 1;
+            if(s[1]!=' '){
+                u = u*10 + (s[1] - '0');
+                st = 2;
             }
-            else
-                prl(ag);
+            int siz = s.size();
+            int v = 0;
+            int fl = 0;
+            //cout<<u<<endl;
+            for(int i=st;i<siz;i++){
+                if(s[i] != ' '){
+                    fl = 1;
+                    v = v*10 + (s[i] - '0');
+                }
+                else if(fl == 1 ){
+                    g[u].pb(v);
+                    g[v].pb(u);
+                    //cout<<v<<endl;
+                    fl = 0;
+                    v = 0;
+                }
+            }
+            if(fl == 1){
+                    g[u].pb(v);
+                    g[v].pb(u);
+                    //cout<<v<<endl;
+                    fl = 0;
+                    v = 0;
+                    //cout<<v<<endl;
+            }
         }
-        else{
-            printf("No way\n");
-        }
+        cout<<all(n)<<endl;
+
     }
 }
-
 
 
 

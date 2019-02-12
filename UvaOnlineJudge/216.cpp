@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -123,7 +123,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
+#define prc(c) printf("Case %d: ",c)
 #define prn(c) printf("Case %d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
@@ -134,169 +134,132 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
 
 /***********Template Ends Here***********/
 /*
-int flag[50005];
-int prime[50005];
+#define prmN 2000000
+
+int flag[prmN+10];
+int prime[prmN+10];
 int ind = 0;
 
 void sieve(){
     flag[0] = 1;
     flag[1] = 1;
-    for(int i=4;i<=50000;i+=2) flag[i]++;
+    for(int i=4;i<=prmN;i+=2) flag[i]++;
     prime[0] = 2;
     ind = 1;
-    for(int i=3;i<=50000;i+=2){
+    for(int i=3;i<=prmN;i+=2){
         if(!flag[i]){
             prime[ind] = i;
             ind++;
-            for(int j=i+i;j<=50000;j+=i)
+            for(int j=i+i;j<=prmN;j+=i)
                 flag[j]++;
         }
     }
-   // cout<<prime[0]<<endl;
-   // cout<<prime[1]<<endl;
-   // cout<<prime[2]<<endl;
+    //cout<<ind<<endl;
+    //cout<<prime[0]<<endl;
+    //cout<<prime[1]<<endl;
+    //cout<<prime[2]<<endl;
 }
 */
 /********************DONE***************/
+//#define ahsan0045
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+double dp[1<<10];
+double mns[1<<10];
+bool vis[1<<10];
+int id[1<<10];
+double x[10];
+double y[10];
+int n;
+
+double dist(int i,int j){
+    return sqrt( (x[i] - x[j] ) * (x[i] - x[j] ) + (y[i] - y[j] ) * (y[i] - y[j] ));
+}
+
+double dist1(int i,int j){
+    cout<<"x  & y "<< x[i]<<" i "<<y[i]<<endl;
+    cout<<"x  & y "<< x[j]<<" j "<<y[j]<<endl;
+    return sqrt( (x[i] - x[j] ) * (x[i] - x[j] ) + (y[i] - y[j] ) * (y[i] - y[j] ));
+}
+
+
+double rec(int mask,int prv){
+    //cout<<mask<<" "<<prv<<endl;
+    if(mask+1 == ( (1<< (n)) )){
+        return 0;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
+    if( vis[mask] ) {
+        //cout<<"mask "<<" "<<mask <<" "<<dp[mask]<<endl;
+        return dp[mask];
     }
-};
+    vis[mask] = true;
+    double ret = 1000000000;
+    int ind = 0;
+    double dd = 0;
+    for(int i=0;i<n;i++){
+        if( ! (mask & (1<<i)) ){
 
+                double d  = dist(prv,i) + 16;
+                double r  = rec(mask | (1<<i) , i ) + d;
+                //cout<<i<<" "<<r<<endl;
+                if( r < ret) {
+                    ret = r;
+                    ind = i;
+                    dd = d;
+                    //cout<<i<<" ############# "<<ret<<endl;
+                }
+                //cout<<r<<" # "<<ret<<endl;
+                //cout<<dist(prv,i)<<" ret "<<ret<<" r "<<r<<endl;
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
 
         }
     }
-
-    return mnm;
+    id[mask] = ind;
+    mns[mask] = dd;
+    return dp[mask] = ret;
 }
+
+void rec1(int mask,int prv){
+    if( mask+1 == (1 << n)) return;
+    cout<<id[mask]<<" "<<dp[mask]<<" per = "<< mns[mask]<<endl;
+    //if( prv != -1) cout<<" dist = "<<dist1(prv,id[mask])<<endl;
+    int idm = mask;
+    mask = mask | (1 << id[mask]);
+
+    rec1(mask,id[idm]);
+
+}
+
 
 int main(){
     #ifdef ahsan0045
-        freopen("in.txt","r",stdin);
-        freopen("out.txt","w",stdout);
+    freopen("in.txt","r",stdin);
+    freopen("out.txt","w",stdout);
     #endif
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+
+    int v,o;
+    lli cnt = 0;
+    lli sum = 0;
+    while(cin>>n){
+        if( n == 0) break;
+        CLR(dp,0);
+        CLR(id,0);
+        CLR(vis,0);
+        FORL(i,0,n){
+            cin>>x[i]>>y[i];
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+
+        cout<<rec(1<<0,0)<<endl;
+        rec1(1<<0,0);
     }
+
 }
+
 
 
 

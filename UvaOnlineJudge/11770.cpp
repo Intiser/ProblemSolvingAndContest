@@ -1,6 +1,6 @@
 /***********Template Starts Here***********/
 //#include <bits/stdc++.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case %d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -134,8 +134,17 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+
 
 /***********Template Ends Here***********/
 /*
@@ -164,100 +173,51 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+int vis[10010];
+int st[10010];
+int freq[10010];
+vector<int>g[10010];
+
+void dfs(int u,int s){
+    int fl  = 0;
+    vis[u] = 1;
+    FORL(i,0,g[u].size()){
+        int v = g[u][i];
+        if(vis[v]  == 0 ){
+            dfs(v,s);
+        }
+        else if(vis[v]==0 && st[v] == 1 && v!= s){
+            st[v] = 0;
+        }
+
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
 
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
+int run(int n){
+    int cnt = 0;
+    int clr = 1;
+    FORE(i,1,n){
+        if(vis[i] == 0){
+            st[i] = 1;
+            dfs(i,i);
+            clr++;
         }
     }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
-        }
+    FORE(i,1,n) {
+        if(st[i] == 1) cnt++;
     }
 
-    return mnm;
+    return cnt;
+}
+
+void clr(int n){
+    FORE(i,0,n) {
+        vis[i] = 0;
+        freq[i] = 0;
+        g[i].clear();
+        st[i] = 0;
+    }
 }
 
 int main(){
@@ -265,38 +225,31 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
     int n,m;
     int a,b,c;
-    edge ed;
-    sc(t);
+    int cas = 1;
+    int t;
+    int tot = 1;
+    cin>>t;
     FORE(cas,1,t){
-        scc(n,m);
-        clr();
+        cin>>n>>m;
         FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+            cin>>a>>b;
+            g[a].pb(b);
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
         prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+        int ans = run(n);
+        pr(ans);
+        //tot = tot + 1 + m;
+        //cout<<tot<<endl;
+        clr(n);
     }
+
+
 }
+
+
+
 
 
 

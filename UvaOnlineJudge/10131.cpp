@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case %d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -134,8 +134,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
 
 /***********Template Ends Here***********/
 /*
@@ -164,141 +164,91 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
+struct node{
     lli w;
-    edge(){
+    lli s;
+    lli ind;
+    bool operator < (node n) const{
+        if(w!=n.w) return w<n.w;
+        return s>n.s;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
+
+}all[1050];
+
+lli dp[1050];
+lli w[1050];
+lli s[1050];
+lli path[1050];
+
+//#define ahsan0045
+
+void lis(int x){
+    if(x == 0){
+        dp[x] = 1;
+        return ;
     }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+    lis(x-1);
+    int mx = 1;
+    dp[x] = 1;
+    for(int i=0;i<x;i++){
+        if(all[i].w<all[x].w && all[i].s>all[x].s) {
+            if(dp[x] < dp[i]+1){
+                dp[x] = dp[i] + 1;
+                path[x] = i;
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
     }
+    //cout<<dp[x]<<" # "<<x<<endl;
+}
 
-    return mnm;
+void prnnn(int n){
+    FORL(i,0,n)
+        cout<<i<<"# "<<all[i].w<<" "<<all[i].s<<" "<<all[i].ind<<endl;
+}
+
+void prp(int x){
+    if(path[x]==-1){
+        cout<<all[x].ind<<endl;
+        return ;
+    }
+    prp(path[x]);
+    cout<<all[x].ind<<endl;
 }
 
 int main(){
     #ifdef ahsan0045
-        freopen("in.txt","r",stdin);
-        freopen("out.txt","w",stdout);
+    freopen("in.txt","r",stdin);
+    freopen("out.txt","w",stdout);
     #endif
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+    string s;
+    lli n,m;
+    int x,y;
+    int in = 0;
+    lli tot = 0;
+    lli mx = 0;
+    while(sccl(m,n)==2){
+        all[in].w = m;
+        all[in].s = n;
+        all[in].ind = in+1;
+        in++;
     }
+    sort(all,all+in);
+    //prnnn(in);
+    CLR(path,-1);
+    lis(in-1);
+    int ans = 0;
+    int inti = -1;
+    for(int i=0;i<in;i++){
+        if(ans < dp[i]){
+            ans = dp[i];
+            inti = i;
+        }
+
+    }
+    cout<<ans<<endl;
+    prp(inti);
 }
-
-
 
 
 

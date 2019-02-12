@@ -177,19 +177,12 @@ struct edge{
 
 
 int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
+int p[100005];
 
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
+
 
 void par(){
-    FORE(i,0,101) p[i] = i;
+    FORE(i,0,100000) p[i] = i;
 }
 
 
@@ -215,50 +208,6 @@ bool check(int u,int v){
 }
 
 
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
-        }
-    }
-
-    return mnm;
-}
 
 int main(){
     #ifdef ahsan0045
@@ -269,33 +218,23 @@ int main(){
     int n,m;
     int a,b,c;
     edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    while(cin>>a){
+        par();
+        lli cnt = 0;
+        while(cin>>b){
+            if(check(a,b) == true){
+                cnt++;
             }
-            else
-                prl(ag);
+            else{
+                Union(a,b);
+            }
+            cin>>a;
+            if(a == -1) break;
         }
-        else{
-            printf("No way\n");
-        }
+        cout<<cnt<<endl;
+
     }
+
 }
 
 

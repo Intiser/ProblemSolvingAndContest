@@ -1,6 +1,6 @@
 /***********Template Starts Here***********/
 //#include <bits/stdc++.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case %d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -134,8 +134,17 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+
+
+
 
 /***********Template Ends Here***********/
 /*
@@ -164,100 +173,106 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
+struct pnt{
+    int x;
+    int y;
+    int step;
 };
 
+char c[1105][1105];
+int vis[1105][1105];
+int fir[1105][1105];
+int n,m;
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
+bool okay(int x,int y){
+    if(x<0||y<0||x>=n||y>=m) return false;
+    if(c[x][y] == '#') return false;
     return true;
 }
 
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
+bool oky(int x,int y){
+    if(x<0||y<0||x==n||y==m) return true;
+    return false;
+}
 
+void fireBFS(){
+    pnt p;
+
+
+    queue<pnt>q;
+        FORL(i,0,n)
+        FORL(j,0,m){
+                if(c[i][j] == 'F'){
+                p.x = i;
+                p.y = j;
+                p.step = 0;
+                 q.push(p);
+                  fir[p.x][p.y] = 1;
+                }
+        }
+
+
+
+
+    pnt pn;
+    while(!q.empty()){
+        p = q.front();
+        q.pop();
+        for(int i=0;i<4;i++){
+            int nx = p.x + dx[i];
+            int ny = p.y + dy[i];
+            int nstep = p.step + 1;
+            if(okay(nx,ny) == true ){
+                if(!fir[nx][ny]){
+                    pn.x = nx;
+                    pn.y = ny;
+                    pn.step = nstep;
+                    fir[nx][ny] = nstep;
+                    q.push(pn);
+                }
+            }
         }
     }
 
-    return mnm;
+}
+
+void checkP(){
+    FORL(i,0,n){
+        FORL(j,0,m) cout<<fir[i][j]<<" ";
+        cout<<endl;
+    }
+}
+
+int joeBFS(int x,int y){
+    pnt p;
+    p.x = x;
+    p.y = y;
+    p.step = 0;
+    queue<pnt>q;
+    vis[x][y] = 1;
+    q.push(p);
+    pnt pn;
+    while(!q.empty()){
+        p = q.front();
+        q.pop();
+        if(p.x == 0 || p.y == 0 || p.x == n-1 || p.y == m-1) return p.step+1;
+        for(int i=0;i<4;i++){
+            int nx = p.x + dx[i];
+            int ny = p.y + dy[i];
+            int nstep = p.step + 1;
+            if(okay(nx,ny) == true ){
+                if(!vis[nx][ny] && (fir[nx][ny]>nstep|| fir[nx][ny] == 0 )){
+                    pn.x = nx;
+                    pn.y = ny;
+                    pn.step = nstep;
+                    vis[nx][ny] = nstep;
+                    q.push(pn);
+                }
+            }
+
+        }
+    }
+    return -1;
 }
 
 int main(){
@@ -265,38 +280,60 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
+
+    int a,b;
+    int cas = 1;
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
+    int tot = 1;
     sc(t);
     FORE(cas,1,t){
         scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+        CLR(fir,0);
+        CLR(vis,0);
+        int stxf=-1;
+        int styf=-1;
+        int stxj=-1;
+        int styj=-1;
+
+        FORL(i,0,n){
+            scanf("%s",c[i]);
+            //printf("%s\n",c[i]);
+            if( (stxj == -1 &&styj == -1) )
+            FORL(j,0,m){
+                if(c[i][j] == 'J') {
+                    stxj = i;
+                    styj = j;
+                }
+
+                //cout<<c[i][j]<<endl;
             }
-            else
-                prl(ag);
+
         }
-        else{
-            printf("No way\n");
+        int ans;
+        //cout<<stxf<<" "<<styf<<endl;
+
+            fireBFS();
+        //checkP();
+
+        if( (stxj != -1 && styj!= -1)   )
+          ans = joeBFS(stxj,styj);
+        else
+            ans = 0;
+        if(ans == -1){
+            printf("IMPOSSIBLE\n");
+        }else {
+            pr(ans);
         }
+        tot = tot + 1 + n;
+        //cout<<cas<<" : "<<tot<<endl;
+
     }
+
+
 }
+
+
+
 
 
 

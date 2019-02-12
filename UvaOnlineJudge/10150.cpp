@@ -1,6 +1,6 @@
 /***********Template Starts Here***********/
 //#include <bits/stdc++.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,100 +164,91 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
+struct node{
+    char s[20];
+    int step;
+    node(){
     }
 };
 
+int fre[20];
+int n;
+char all[20][26000][20];
+char ok[26000][20];
+map<string,int>vis;
+map<string,int>ind;
+vector<string>sol;
+int par[26000];
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
+bool check(char s[],char t[]){
+    if(strlen(s) != strlen(t)) return false;
+    int siz = strlen(s);
+    int cnt = 0;
+    FORL(i,0,siz){
+        if(s[i]!=t[i]) cnt++;
     }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
+    //cout<<s<<" "<<t<<" "<<cnt<<endl;
+    if(cnt==1) return true;
     return false;
 }
 
+int bfs(char st[],char en[]){
+    if(strlen(st)!=strlen(en)) return -1;
+    vis.clear();
+    sol.clear();
+    CLR(par,0);
+    int ss = ind[st];
+    par[ss] = ss;
+    queue<char*>q;
+    q.push(st);
+    vis[st] = 1;
+    int siz = strlen(st);
+    while(!q.empty()){
+        char *now = new char[20];
+        now = q.front();
+        q.pop();
+        int pp = ind[now];
+        //cout<<now.s<<" "<<now.step<<endl;
+        if(strcmp(now,en) == 0) return 1;
+        node no;
 
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
+        FORL(i,0,fre[siz]){
 
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
 
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+            if(!vis[all[siz][i]]&&check(now,all[siz][i])==true){
+
+
+                q.push(all[siz][i]);
+                vis[all[siz][i]] = 1;
+                int p = ind[all[siz][i]];
+                par[p] = pp;
+
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
-    }
 
-    return mnm;
+    }
+    return -1;
+}
+
+void get(int v){
+    //cout<<v<<endl;
+    while(par[v] != v && par[v]!=0){
+        puts(ok[v]);
+        v = par[v];
+
+    }
+    printf("%s\n",ok[v]);
+    //get(par[v]);
+    //printf("%s\n",ok[v]);
+
+
+}
+
+void print(){
+    int siz = sol.size();
+    FORL(i,0,siz){
+        cout<<sol[i]<<endl;
+    }
 }
 
 int main(){
@@ -265,39 +256,36 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
+    char s[20];
+    char t[20];
+    char c[20];
+    int st = 1;
+    while(gets(ok[st])){
+        int siz = strlen(ok[st]);
+        if(siz == 0) break;
+        strcpy(all[siz][fre[siz]],ok[st]);
+        ind[ok[st]] = st;
+        fre[siz]++;
+        st++;
+        //cout<<fre[siz]<<" "<<st<<endl;
+
+    }
+    n = st;
+    int strt = 0;
+    while(scanf("%s %s",s,t)==2){
+        if(strt) printf("\n");
+        int ans = bfs(t,s);
+        //cout<<ans<<endl;
+        if(ans != -1 ){
+            get(ind[s]);
+
         }
         else{
-            printf("No way\n");
+            printf("No solution.\n");
         }
+        strt = 1;
     }
 }
-
 
 
 

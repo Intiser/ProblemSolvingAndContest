@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -177,19 +177,14 @@ struct edge{
 
 
 int fl[1005];
-int p[1005];
+int p[100005];
+lli mx;
 vector<edge>all;
-vector<int>org;
 
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
+
 
 void par(){
-    FORE(i,0,101) p[i] = i;
+    FORE(i,0,100000) p[i] = i;
 }
 
 
@@ -215,50 +210,22 @@ bool check(int u,int v){
 }
 
 
-lli mst(int x){
-    int siz = all.size();
+void mst(){
+    sort(all.begin(),all.end());
+    mx = 0;
     par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
+    for(int i=0;i<all.size();i++){
+        int u = all[i].u;
+        int v = all[i].v;
+        lli w = all[i].w;
+        if(check(u,v) == false){
+            Union(u,v);
+            mx = MAX(mx,w);
         }
     }
 
-    return mnm;
 }
+
 
 int main(){
     #ifdef ahsan0045
@@ -269,36 +236,31 @@ int main(){
     int n,m;
     int a,b,c;
     edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    while(cin>>n>>m){
+            if(n==0&&m==0) break;
+            all.clear();
+            FORE(i,1,m){
+                cin>>a>>b>>c;
+                ed.u = a+1;
+                ed.v = b+1;
+                ed.w = c;
+                all.pb(ed);
             }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+            mst();
+            int flag = 0;
+            int rt = findP(1);
+            FORE(i,2,n){
+                int  r = findP(i);
+                if(r != rt) flag = 1;
+            }
+            if(flag == 0){
+                cout<<mx<<endl;
+            }
+            else{
+                cout<<"IMPOSSIBLE"<<endl;
+            }
     }
+
 }
-
-
-
 
 

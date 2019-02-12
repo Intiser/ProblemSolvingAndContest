@@ -164,100 +164,46 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+int g[150][3];
+char root;
+int par[150];
+string s1,s2;
+
+bool check(char c,char post){
+    int siz = s2.size();
+    int fl = 0;
+    for(int i=0;i<siz;i++){
+        if(s2[i] == c) fl = 1;
+        if(fl == 1){
+            if(s2[i] == post )return true;
+        }
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
     return false;
 }
 
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
+void dfs(int u){
+    if(u == -1) return ;
+    dfs(g[u][0]);
+    dfs(g[u][1]);
+    printf("%c",u);
 }
 
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
+void dfsBuild(int root,int now){
+    if(check(now,root) == true){
+        if(g[root][0]==-1){
+            g[root][0] = now;
+            return ;
         }
-    }
+        dfsBuild(g[root][0],now);
 
-    return mnm;
+    }
+    else{
+         if(g[root][1]==-1){
+            g[root][1] = now;
+            return ;
+        }
+        dfsBuild(g[root][1],now);
+    }
 }
 
 int main(){
@@ -268,35 +214,26 @@ int main(){
     int t;
     int n,m;
     int a,b,c;
-    edge ed;
+
     sc(t);
     FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+        sc(n);
+        CLR(par,-1);
+        CLR(g,-1);
+        cin>>s1>>s2; // root-left-right  left-root-right
+        root = s1[0];
+        int pr = root;
+        int now;
+        for(int i=1;i<n;i++){
+            dfsBuild(root,s1[i]);
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+        dfs(root);
+        printf("\n");
+
     }
+
 }
+
 
 
 

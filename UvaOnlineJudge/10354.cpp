@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -164,100 +164,86 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
+lli dist[105][105];
+lli dis[105][105];
+lli par[105][105];
+bool flag[105];
 
+void init(int n){
+    FORE(i,0,n){
+        flag[i] = false;
+        FORE(j,0,n){
+            if(i==j) dist[i][j] = 0;
+            else dist[i][j] = inf;
+            if(i==j) dis[i][j] = 0;
+            else dis[i][j] = inf;
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
         }
     }
-    return tot;
+
 }
 
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
+void floyd(int n){
+    FORE(i,0,n)
+        FORE(j,0,n)
+            par[i][j] = i;
 
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+    FORE(k,0,n){
+        FORE(i,0,n){
+            FORE(j,0,n){
+                if( dist[i][k] + dist[k][j] < dist[i][j]){
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    par[i][j] = par[k][j];
+                    //cout<<dist[i][k]<<" "<<dist[k][j]<<" = "<<dist[i][j]<<endl;
+                    //cout<<" pre "<<i<<" "<<k<<" "<<j<<" "<<dist[i][j]<<endl;
+                }
             }
-            else
-                mnm = MIN(mnm,ret);
+        }
+    }
+}
 
+void path(int x,int y){
+    if(x != y) path(x,par[x][y]);
+    cout<<" # "<<y<<endl;
+}
+
+void funct(int x,int n){
+    for(int i=0;i<=n;i++){
+        if(i!=x){
+            dis[i][x] = inf;
+            dis[x][i] = inf;
         }
     }
 
-    return mnm;
+}
+
+void del(int x,int y,int n){
+    lli mn = MIN(dist[x][y],dist[y][x]);
+    dist[x][y] = mn;
+    dist[y][x] = mn;
+    FORE(i,0,n){
+        if(dist[x][i] + dist[i][y] == dist[x][y] ||  dist[y][i] + dist[i][x] == dist[y][x]) {
+            flag[i] = true;
+            //cout<<"del = "<<i<<endl;
+        }
+    }
+}
+
+void run(int n){
+      FORE(k,0,n){
+        if(flag[k] == true) continue;
+        FORE(i,0,n){
+            if(flag[i] == true) continue;
+            FORE(j,0,n){
+                if(flag[j] == true) continue;
+                if(dis[i][k] + dis[k][j] < dis[i][j]){
+                    dis[i][j] = dis[i][k] + dis[k][j];
+                    //cout<<" try "<<i<<" "<<j<<" "<<dis[i][j]<<endl;
+                }
+
+            }
+        }
+    }
 }
 
 int main(){
@@ -265,38 +251,43 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
     int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
+    int bosOF;
+    int bosHM;
+    int MY;
+    int Mar;
+    lli a,b,c;
+    int cnt = 1;
+    int cas = 1;
+    while(cin>>n>>m){
+        cin>>bosOF>>bosHM>>MY>>Mar;
+        init(n);
+        cnt = cnt + m;
         FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+            cin>>a>>b>>c;
+            dist[a][b] = c;
+            dis[a][b] = c;
+            dist[b][a] = c;
+            dis[b][a] = c;
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
+
+        floyd(n);
+       // path(bosHM,bosOF);
+        del(bosHM,bosOF,n);
+        //init(n);
+        //cout<<dis[MY][Mar]<<endl;
+        run(n);
+        if(dis[MY][Mar]>=inf || flag[Mar] == true || flag[MY] == true){
+            cout<<"MISSION IMPOSSIBLE."<<endl;
         }
-        else{
-            printf("No way\n");
-        }
+        else
+        cout<<dis[MY][Mar]<<endl;
+        //cout<<cas<<" # "<<cnt<<endl;
+        cnt++;
+        cas++;
     }
 }
+
 
 
 

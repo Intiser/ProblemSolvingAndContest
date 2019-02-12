@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -167,97 +167,75 @@ void sieve(){
 struct edge{
     int u;
     int v;
-    lli w;
-    edge(){
-    }
+    double dist;
     bool operator < (edge e) const {
-        return e.w > w;
+        return e.dist > dist;
     }
 };
 
-
-int fl[1005];
-int p[1005];
 vector<edge>all;
-vector<int>org;
+pair<int,int>pp[1000000];
 
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
+struct point{
+    int x;
+    int y;
+}pnt[1000];
+
+int p[1050];
+
+double dist(int x1,int y1,int x2,int y2){
+    return sqrt( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) );
+}
+
+void allp(int n){
     all.clear();
-    org.clear();
+    edge e;
+    for(int i=1;i<=n;i++)
+        for(int j=i+1;j<=n;j++){
+           e.u = i;
+           e.v = j;
+           e.dist = dist(pnt[i].x , pnt[i].y , pnt[j].x , pnt[j].y);
+           all.pb(e);
+        }
 }
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
 
 int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
+    if(u == p[u]) return u;
     p[u] = findP(p[u]);
     return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
 }
 
 bool check(int u,int v){
     int pu = findP(u);
     int pv = findP(v);
-    if(pu == pv) return true;
+    if( pu == pv ) return true;
     return false;
 }
 
+void Union(int u,int v){
+    int pu = findP(u);
+    int pv = findP(v);
+    //cout<<pu<<" "<<pv<<endl;
+    p[pv] = p[pu];
+}
 
-lli mst(int x){
+int cnt;
+
+void mst(int n){
+    sort(all.begin(),all.end());
     int siz = all.size();
-    par();
-    lli tot = 0;
+    cnt = 0;
     for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
+        int u = all[i].u;
+        int v = all[i].v;
+        if(check(u,v) == false){
+            pp[cnt].ff = u;
+            pp[cnt].ss = v;
+            cnt++;
+            Union(u,v);
 
         }
     }
-
-    return mnm;
 }
 
 int main(){
@@ -266,39 +244,37 @@ int main(){
         freopen("out.txt","w",stdout);
     #endif
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+    int n;
+    while(cin>>n){
+
+        FORE(i,1,n){
+            scc(pnt[i].x,pnt[i].y);
+            p[i] = i;
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
+        cnt = 0;
+        allp(n);
+        int m;
+        sc(m);
+        int u,v;
+        //cout<<1<<endl;
+        FORE(i,1,m){
+            scc(u,v);
+            Union(u,v);
+        }
+        //cout<<1<<endl;
+        mst(n);
+        if(cnt == 0){
+            printf("No new highways need\n");
         }
         else{
-            printf("No way\n");
+            //sort(pp,pp+cnt);
+            FORL(i,0,cnt){
+                cout<<pp[i].ff<<" "<<pp[i].ss<<endl;
+            }
         }
+        if(t) printf("\n");
     }
 }
-
-
 
 
 

@@ -7,6 +7,8 @@
 
 using namespace std;
 
+//#define ahsan0045
+
 struct pnt{
     int rw;
     int cl;
@@ -39,7 +41,6 @@ bool check(pnt p){
     if(p.cl==m||p.cl<0) return false;
     if(p.ht==h||p.ht<0) return false;
     if(c[p.rw][p.cl][p.ht]=='.'||c[p.rw][p.cl][p.ht]=='E') return true;
-    used[p.rw][p.cl][p.ht] = 1;
     return false;
 }
 
@@ -74,7 +75,6 @@ int bfs(int x,int y,int z){
         if(gotit(p)) return p.cont;
         qu.pop();
         //cout<<p.rw<<" "<<p.cl<<" "<<p.ht<<endl;
-
         for(int i=0;i<6;i++){
             pnt pn;
             pn.cl = p.cl + dy[i];
@@ -83,7 +83,6 @@ int bfs(int x,int y,int z){
             pn.cont = p.cont + 1;
             if(used[pn.rw][pn.cl][pn.ht]==0&&check(pn)){
                 qu.push(pn);
-                if(gotit(pn)) return pn.cont;
                 used[pn.rw][pn.cl][pn.ht] = 1;
             }
             //cout<<pn.rw<<" "<<pn.cl<<" "<<pn.ht<<" "<<check(pn)<<" "<<gotit(pn)<<endl;
@@ -120,9 +119,10 @@ void convert(int n,int m,int h){
 }
 
 int main(){
-    //freopen("in.txt","r",stdin);
-    //freopen("out.txt","w",stdout);
-
+    #ifdef ahsan0045
+    freopen("in.txt","r",stdin);
+    freopen("out.txt","w",stdout);
+    #endif // ahsan0045
     int ans;
 
     while(cin>>n>>m>>h){

@@ -1,6 +1,6 @@
 /***********Template Starts Here***********/
 //#include <bits/stdc++.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case %d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -134,8 +134,17 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+
 
 /***********Template Ends Here***********/
 /*
@@ -164,100 +173,42 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+int dfs_low[2050];
+int dfs_num[2050];
+stack<int>all;
+int vis[2050];
+int dfsc;
+vector<int>g[2050];
+int num;
+
+void SCC(int u){
+    dfs_low[u] = dfs_num[u] = dfsc++;
+    all.push(u);
+    vis[u] = 1;
+    FORL(i,0,g[u].size() ){
+        int v = g[u][i];
+        if(dfs_num[v] == -1) SCC(v);
+        if(vis[v]) dfs_low[u] = MIN(dfs_low[u],dfs_low[v]);
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
+    if(dfs_low[u] == dfs_num[u]){
+        while(true){
+            int v = all.top();
+            all.pop();
+            vis[v] = 0;
+            if(u == v) break;
         }
+        num++;
     }
-    return tot;
 }
 
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
 
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
-        }
-    }
-
-    return mnm;
+void clr(int n){
+    CLR(dfs_low,0);
+    CLR(dfs_num,-1);
+    FORE(i,0,2000) g[i].clear();
+    CLR(vis,0);
+    dfsc = 0;
+    num = 0;
 }
 
 int main(){
@@ -265,38 +216,35 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
     int n,m;
     int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    int cas = 1;
+    int t;
+    while(cin>>n>>m){
+            if(n==0&&m==0) break;
+            clr(n);
+            FORE(i,1,m){
+                cin>>a>>b>>c;
+                g[a].pb(b);
+                if(c == 2)
+                g[b].pb(a);
             }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+            num = 0;
+            FORE(i,1,n){
+                if(dfs_num[i]==-1){
+                    SCC(i);
+                    //cout<<i<<endl;
+                }
+            }
+            //cout<<num<<endl;
+            if(num == 1) cout<<1<<endl;
+            else cout<<0<<endl;
     }
+
 }
+
+
+
 
 
 

@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -165,100 +165,65 @@ void sieve(){
 /********************DONE***************/
 
 struct edge{
-    int u;
     int v;
     lli w;
+    lli c;
+    lli mnp;
+    lli pre;
     edge(){
     }
     bool operator < (edge e) const {
-        return e.w > w;
+        return e.c > c;
     }
 };
 
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
+lli dist[1005];
+lli cost[1005];
+lli pos[1005];
+vector<edge>g[1005];
 
 
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void djkastra(int src,lli cd){
+    dist[src] = 0;
+    cost[src] = 0;
+    edge ed;
+    ed.v = src;
+    ed.w = 0;
+    ed.c = 0;
+    ed.mnp = 0;
+    ed.pre = inf;
+    priority_queue<edge,vector<edge> >pq;
+    pq.push(ed);
+    cout<<src<<endl;
+    while(!pq.empty()){
+        ed = pq.top();
+        pq.pop();
+        int u = ed.v;
+        lli w = ed.w;
+        lli c = ed.c;
+        lli mnp = ed.mnp;
+        lli pre = ed.pre;
+        cout<<u<<" "<<c<<endl;
+        for(int i=0;i<g[u].size();i++){
+            ed = g[u][i];
+            int v = ed.v;
+            lli d = ed.w;
+            if(  mnp >= d  || (cost[u] + ( (d-mnp)*pos[u]) < cost[v]  && d <= cd) ){
+                dist[v] = dist[u] + d;
+                if(mnp >= d) cost[v] = cost[u] + d * pre;;
+                else
+                cost[v] = cost[u] + (d-mnp)*pos[u];
+                ed.w = dist[v];
+                ed.c = cost[v];
+                pq.push(ed);
+                if(pos[v] > pos[u])
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
     }
 
-    return mnm;
 }
+
+
 
 int main(){
     #ifdef ahsan0045
@@ -269,36 +234,47 @@ int main(){
     int n,m;
     int a,b,c;
     edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    int q;
+    int dd;
+    int st,en;
+    while(cin>>n>>m){
+            FORE(i,0,1000) {
+                dist[i] = inf;
+                g[i].clear();
             }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+            int mxm = 0;
+            FORL(i,0,n){
+                scl(pos[i]);
+            }
+            FORE(i,1,m){
+                sccc(a,b,c);
+                ed.v = b;
+                ed.w = c;
+                ed.c = 0;
+                g[a].pb(ed);
+                ed.v = a;
+                g[b].pb(ed);
+                mxm = MAX(mxm,a);
+                mxm = MAX(mxm,b);
+            }
+            sc(q);
+            FORE(i,1,q){
+                sccc(dd,st,en);
+                FORE(j,0,n){
+                    dist[j] = inf;
+                    cost[j] = inf;
+                }
+                djkastra(st,dd);
+                if(dist[en]==inf){
+                    cout<<"-1"<<endl;
+                }
+                else
+                    cout<<cost[en]<<endl;
+            }
+
     }
+
 }
-
-
 
 
 

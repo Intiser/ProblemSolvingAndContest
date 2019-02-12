@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case %d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -134,8 +134,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
 
 /***********Template Ends Here***********/
 /*
@@ -164,139 +164,111 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
+vector<int>g[150];
+vector<int>all;
+int ind[150];
+int f[150];
+lli cost[150];
+lli lvl[150];
+lli fns;
 
 void clr(){
-    CLR(fl,0);
-    CLR(p,0);
+    for(int i=0;i<=130;i++){
+        g[i].clear();
+        ind[i] = 0;
+        f[i] = 0;
+        cost[i] = 0;
+        lvl[i] = 0;
+    }
     all.clear();
-    org.clear();
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
+void check(int n){
+    if(f[n]) return;
+    all.pb(n);
+    f[n] = 1;
 }
 
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
+void topsort(){
     int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
+    queue<int>q;
+    FORL(i,0,siz){
+        if(ind[all[i]] == 0){
+            q.push(all[i]);
+            lvl[all[i]] = cost[all[i]];
         }
+        //cout<<ind[all[i]]<<" "<<cost[all[i]]<<endl;
     }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+    fns = 0;
+    while(!q.empty()){
+        int u = q.front();
+        q.pop();
+        for(int i=0;i<g[u].size();i++){
+            int v = g[u][i];
+            if(lvl[v] < lvl[u] + cost[v]){
+                lvl[v] = lvl[u] + cost[v];
+                q.push(v);
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
+        if(fns < lvl[u]) fns = lvl[u];
     }
-
-    return mnm;
 }
+
+
+//#define ahsan0045
 
 int main(){
     #ifdef ahsan0045
-        freopen("in.txt","r",stdin);
-        freopen("out.txt","w",stdout);
+    freopen("in.txt","r",stdin);
+    freopen("out.txt","w",stdout);
     #endif
     int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
+    string s;
+
+    int x,y;
+    int in = 0;
+
     sc(t);
+    cin.ignore();
+    getchar();
     FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+        //cout<<t<<endl;
+        while(getline(cin,s)){
+            if(s == "") break;
+            //cout<<s<<endl;
+            int siz = s.size();
+            //cout<<siz<<endl;
+            x = s[0] - 'A' + 1;
+            check(x);
+            in = 1;
+            lli tmp = 0;
+            while( s[in]<'0'||s[in]>'9' && in<siz) in++;
+            while( s[in]>='0'&&s[in]<='9' && in<siz) {
+                tmp = tmp * 10 + s[in] - '0' ;
+                in++;
             }
-            else
-                prl(ag);
+            while( (s[in]<'A'||s[in]>'Z') && in < siz ) in++;
+            while( (s[in]>='A'&& s[in]<='Z' && in < siz) ){
+                y = s[in] - 'A' + 1;
+                check(y);
+                g[y].pb(x);
+                ind[x]++;
+                in++;
+            }
+            cost[x] = tmp;
+            //cout<<s<<" "<<in<<endl;
         }
-        else{
-            printf("No way\n");
-        }
+        topsort();
+        cout<<fns<<endl;
+        if(cas<t) printf("\n");
+        clr();
+
     }
 }
+
+
+
+
 
 
 

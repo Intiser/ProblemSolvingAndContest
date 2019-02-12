@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,139 +164,108 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
+map<string,int>inde;
+vector<int>g[105];
+int vis[105];
+int AP[105];
+int tim;
+vector<string>all;
+string s[105];
+int n,m;
+int dfs_cnt;
+int dfs_num[105];
+int dfs_low[105];
+int dfs_parent[105];
+int dfs_root;
+int child;
 
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void dfs(int u){
+        dfs_low[u] = dfs_num[u] = dfs_cnt++;
+        vis[u] = 1;
+        for(int i=0;i<g[u].size();i++){
+            int v = g[u][i];
+            if(!vis[v]){
+                if(u == dfs_root) child++;
+                dfs_parent[v] = u;
+                dfs(v);
+                if(dfs_low[v] >= dfs_num[u] && u!= dfs_root) {
+                    //cout<<dfs_low[v]<<" "<<dfs_num[u]<<" "<<s[u]<<endl;
+                    AP[u] = 1;
+                }
+                dfs_low[u] = MIN(dfs_low[u],dfs_low[v]);
             }
-            else
-                mnm = MIN(mnm,ret);
-
+            else if(v != dfs_parent[u])
+                dfs_low[u] = MIN(dfs_low[u],dfs_num[v]);
         }
-    }
+}
 
-    return mnm;
+void APP(int n){
+        CLR(vis,0);
+        CLR(AP,0);
+        CLR(dfs_low,0);
+        CLR(dfs_num,0);
+        CLR(dfs_parent,0);
+        CLR(AP,0);
+        all.clear();
+        for(int i=1;i<=n;i++){
+            if(vis[i]==0){
+                dfs_root = i;
+                child = 0;
+                dfs(i);
+                if(child >= 2) AP[i] = 1;
+            }
+        }
+        for(int i=1;i<=n;i++){
+            if(AP[i] == 1){
+                all.push_back(s[i]);
+            }
+        }
 }
 
 int main(){
     #ifdef ahsan0045
-        freopen("in.txt","r",stdin);
-        freopen("out.txt","w",stdout);
+    freopen("in.txt","r",stdin);
+    freopen("out.txt","w",stdout);
     #endif
-    int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+
+        string a,b;
+        int cas = 1;
+        while(cin>>n){
+                if(n==0)break;
+                if(cas > 1) printf("\n");
+                inde.clear();
+                tim = 0;
+                all.clear();
+                FORE(i,0,n) g[i].clear();
+                FORE(i,1,n){
+                        cin>>s[i];
+                        inde[s[i]] = i;
+                }
+                cin>>m;
+                FORE(i,1,m){
+                    cin>>a>>b;
+                    int x = inde[a];
+                    int y = inde[b];
+                    g[x].pb(y);
+                    g[y].pb(x);
+                }
+                dfs_cnt = 0;
+                APP(n);
+                sort(all.begin(),all.end());
+                printf("City map #%d: %d camera(s) found\n",cas,all.size());
+                for(int i=0;i<all.size();i++){
+                     cout<<all[i]<<endl;;
+                    //else cout<<" "<<all[i];
+                }
+                //if(all.size() > 0)
+                //cout<<endl;
+                cas++;
+
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
-    }
+
 }
+
+
 
 
 

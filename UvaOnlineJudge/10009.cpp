@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case #%d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,100 +164,52 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+map<string,int>indx;
+lli ind;
+int vis[10000];
+int path[10000];
+vector<int>g[10000];
+string ss[10000];
+
+int check(string str){
+    if(!indx[str]){
+        indx[str] = ind;
+        ss[ind] = str;
+        ind++;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
+    return indx[str];
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void bfs(int s,int e){
+    queue<int>q;
+    q.push(s);
+    vis[s] = 1;
+    path[s] = s;
+    while(!q.empty()){
+        int u = q.front();
+        q.pop();
+        if(u == e) return ;
+        for(int i=0;i<g[u].size();i++){
+            int v = g[u][i];
+            if(vis[v]==0){
+                vis[v] = 1;
+                q.push(v);
+                path[v] = u;
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
     }
 
-    return mnm;
+}
+
+string ans;
+
+void onPath(int u,int v){
+        if(u == v){
+           ans.push_back(ss[v][0]);
+           return ;
+        }
+        onPath(u,path[v]);
+        ans.push_back(ss[v][0]);
 }
 
 int main(){
@@ -267,34 +219,36 @@ int main(){
     #endif
     int t;
     int n,m;
-    int a,b,c;
-    edge ed;
+    string a,b;
+    int u;
+    int v;
     sc(t);
     FORE(cas,1,t){
         scc(n,m);
-        clr();
+        ind = 1;
+        indx.clear();
+        FORE(i,1,n){
+            cin>>a>>b;
+            u = check(a);
+            v = check(b);
+            g[u].pb(v);
+            g[v].pb(u);
+        }
         FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+            cin>>a>>b;
+            u = check(a);
+            v = check(b);
+            CLR(vis,0);
+            CLR(path,0);
+            bfs(u,v);
+            ans.clear();
+            onPath(u,v);
+            cout<<ans<<endl;
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+        if(cas<t)
+        printf("\n");
+
+        FORE(i,0,ind) g[i].clear();
     }
 }
 

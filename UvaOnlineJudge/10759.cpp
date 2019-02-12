@@ -55,7 +55,7 @@ typedef vector<pll> vll;
 typedef vector<vlong> vl;
 
 
-const vlong inf = 2147383647;
+const vlong inf = 1000000000;
 const double pi = 2 * acos ( 0.0 );
 const double eps = 1e-9;
 
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,140 +164,106 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
+int n;
+int amnt;
+int cnt;
+int fr[50];
 
+void rec(int x,int tot){
+    if(x == n){
+        fr[tot]++;
+        if(tot >= amnt)
+            cnt++;
+        return;
+    }
+    for(int i=1;i<=6;i++){
+        rec(x+1,tot+i);
+    }
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
+}
+
+int arr[105][105];
+
+lli f1[155];
+lli f2[155];
 
 void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
+    for(int i=0;i<=100;i++) f1[i] = f2[i];
+    CLR(f2,0);
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
-        }
-    }
-
-    return mnm;
-}
+//#define ahsan0045
 
 int main(){
     #ifdef ahsan0045
-        freopen("in.txt","r",stdin);
-        freopen("out.txt","w",stdout);
+    freopen("in.txt","r",stdin);
+    freopen("out.txt","w",stdout);
     #endif
-    int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
-    }
-}
+//    arr[1][0] = 1;
+//    arr[1][1] = 1;
+//    for(int i=2;i<=15;i++){
+//        arr[i][0] = 1;
+//        for(int j=1;j<i;j++){
+//            arr[i][j] = arr[i-1][j-1] + arr[i-1][j];
+//        }
+//        arr[i][i] = 1;
+//    }
+//    for(int i=1;i<=15;i++){
+//        for(int j=0;j<=i;j++) cout<<arr[i][j]<<" ";
+//        cout<<endl;
+//    }
 
+    int a,b,c;
+    int cas = 1;
+    int t;
+    cnt = 0;
+    while(cin>>n>>amnt){
+        if(n == 0 && amnt == 0) break;
+        cnt = 0;
+
+        int lim = 6;
+        f1[1] = 1;
+        f1[2] = 1;
+        f1[3] = 1;
+        f1[4] = 1;
+        f1[5] = 1;
+        f1[6] = 1;
+        for(int i=2;i<=n;i++){
+            lim = i*6 - 6;
+            //cout<<i-1<<" "<<lim<<endl;
+            for(int j=i-1;j<=lim;j++){
+                f2[j+1] += f1[j];
+                f2[j+2] += f1[j];
+                f2[j+3] += f1[j];
+                f2[j+4] += f1[j];
+                f2[j+5] += f1[j];
+                f2[j+6] += f1[j];
+                //cout<<f2[j+1]<<" "<<f1[j]<<endl;
+            }
+            for(int j=i;j<=lim+6;j++){
+                f1[j] = f2[j];
+            }
+            CLR(f2,0);
+        }
+        //cout<<" #### "<<endl;
+        //for(int i=n;i<=6*n;i++) cout<<i<<" "<<f1[i]<<" "<<f2[i]<<endl;
+        lli num = 0;
+        for(int i=amnt;i<=6*n;i++){
+            num += f1[i];
+        }
+        int tmp = n;
+        lli dnum = 1;
+        while(tmp--)  dnum = dnum * 6;
+        if(num >= dnum) cout<<1<<endl;
+        else if(num == 0) cout<<0<<endl;
+        else{
+            lli g = gcd(num,dnum);
+            cout<<(num/g)<<"/"<<dnum/g<<endl;
+        }
+
+    }
+
+}
 
 
 

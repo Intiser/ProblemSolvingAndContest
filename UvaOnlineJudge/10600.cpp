@@ -241,19 +241,14 @@ bool isIt(int n){
     return true;
 }
 
-lli renall(lli mn,int n){
+lli renall(int n){
     int siz = org.size();
-    int mnm = -1;
+    lli mnm = 101 * 101 * 301;
     for(int i=0;i<siz;i++){
         int a = org[i];
         lli ret = mst(a);
         if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
                 mnm = MIN(mnm,ret);
-
         }
     }
 
@@ -283,18 +278,10 @@ int main(){
         sort(all.begin(),all.end());
         lli mn = mst(-1);
         //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+        //prc(cas);
+        lli mn1 = renall(n);
+        cout<<mn<<" "<<mn1<<endl;
+
     }
 }
 

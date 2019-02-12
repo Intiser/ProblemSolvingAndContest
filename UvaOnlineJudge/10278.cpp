@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -165,7 +165,6 @@ void sieve(){
 /********************DONE***************/
 
 struct edge{
-    int u;
     int v;
     lli w;
     edge(){
@@ -175,89 +174,44 @@ struct edge{
     }
 };
 
+lli dist[1005];
+lli dist1[1005];
+vector<edge>g[1005];
+vector<int> fire;
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void djkastra(int src){
+    dist[src] = 0;
+    edge ed;
+    ed.v = src;
+    ed.w = 0;
+    priority_queue<edge,vector<edge> >pq;
+    pq.push(ed);
+    while(!pq.empty()){
+        ed = pq.top();
+        pq.pop();
+        int u = ed.v;
+        lli w = ed.w;
+        for(int i=0;i<g[u].size();i++){
+            ed = g[u][i];
+            int v = ed.v;
+            lli d = ed.w;
+            if(dist[u] + d < dist[v]){
+                dist[v] = dist[u] + d;
+                ed.w = dist[v];
+                pq.push(ed);
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
     }
 
-    return mnm;
+}
+
+
+void run(){
+        int siz = fire.size();
+        FORL(i,0,siz){
+            int s = fire[i];
+            djkastra(s);
+        }
 }
 
 int main(){
@@ -268,37 +222,87 @@ int main(){
     int t;
     int n,m;
     int a,b,c;
+    string s;
     edge ed;
     sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    while(t--){
+            scc(n,m);
+            FORE(i,0,1000) {
+                dist[i] = inf;
+                g[i].clear();
             }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+
+            fire.clear();
+            FORE(i,1,n){
+                sc(a);
+                fire.pb(a);
+
+            }
+            cin.ignore();
+            while(getline(cin,s)){
+                if(s.size() == 0) break;
+                int fl = 0;
+                int cnt = 0;
+                int siz = s.size();
+                a = 0; b = 0; c = 0;
+                int tmp = 0;
+                for(int i=0;i<siz;i++){
+                    if(s[i]!=' '){
+                        tmp = tmp *10 + (s[i] - '0');
+                        fl = 1;
+                    }
+                    else if(fl == 1){
+                        if(cnt == 0) a = tmp;
+                        if(cnt == 1) b = tmp;
+                        if(cnt == 2) c = tmp;
+                        cnt++;
+                        tmp = 0;
+                        fl = 0;
+                    }
+                }
+                if(fl == 1) {
+                    c = tmp;
+                    tmp = 0;
+                    fl = 0;
+                }
+                ed.v = b;
+                ed.w = c;
+                g[a].pb(ed);
+                ed.v = a;
+                g[b].pb(ed);
+
+            }
+
+            run();
+            lli mx = 0;
+            lli mxm = 0;
+            int ind = 1;
+            FORE(i,1,m){
+                    dist1[i] = dist[i];
+                mxm = MAX(dist[i],mxm);
+            }
+            FORE(j,1,m){
+                djkastra(j);
+                mx = 0;
+                FORE(i,1,m){
+                    if(mx < dist[i]){
+                        mx = dist[i];
+                    }
+                    //cout<<i<<" "<<dist[i]<<endl;
+                }
+                if(mxm > mx ){
+                    mxm = mx;
+                    ind = j;
+                }
+
+                FORE(i,1,m) dist[i] = dist1[i];
+            }
+            pr(ind);
+            if(t) printf("\n");
+            //FORE(i,0,n) g[i].clear();
+
     }
+
 }
-
-
-
 
 

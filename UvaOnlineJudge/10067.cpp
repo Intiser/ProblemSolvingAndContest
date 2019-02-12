@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,100 +164,55 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
+struct node{
+    int arr[5];
+    int step;
+    node(){
     }
 };
 
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
+int vis[10009];
+int no[10009];
+int conv(int arr[]){
+    return arr[0]*1000 + arr[1]*100 + arr[2]*10 + arr[3];
 }
+int d[] = {-1,+1};
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
+int bfs(int st[],int en[]){
+    int tgt = conv(en);
+    int str = conv(st);
+    node ne;
+    ne.arr[0] = st[0];
+    ne.arr[1] = st[1];
+    ne.arr[2] = st[2];
+    ne.arr[3] = st[3];
+    ne.step   = 0;
+    vis[str] = 1;
+    queue<node>q;
+    q.push(ne);
+    while(!q.empty()){
+        ne = q.front();
+        q.pop();
+        int here = conv(ne.arr);
+        if(here == tgt) return ne.step;
 
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+        FORL(i,0,2)
+            FORL(j,0,4){
+                node nn = ne;
+                nn.arr[j] += d[i];
+                if(nn.arr[j] == -1) nn.arr[j] =9;
+                if(nn.arr[j] == 10) nn.arr[j] =0;
+                int now = conv(nn.arr);
+                if(vis[now] == 0 && no[now] == 0){
+                    nn.step = ne.step + 1;
+                    q.push(nn);
+                    vis[now] = 1;
+                }
             }
-            else
-                mnm = MIN(mnm,ret);
 
-        }
     }
+    return -1;
 
-    return mnm;
 }
 
 int main(){
@@ -268,37 +223,29 @@ int main(){
     int t;
     int n,m;
     int a,b,c;
-    edge ed;
+    int strt[5];
+    int endd[5];
+    int forb[5];
     sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+    while(t--){
+        scc(strt[0],strt[1]); scc(strt[2],strt[3]);
+        scc(endd[0],endd[1]); scc(endd[2],endd[3]);
+        sc(n);
+        FORE(i,1,n){
+            scc(forb[0],forb[1]); scc(forb[2],forb[3]);
+            int x = conv(forb);
+            no[x] = 1;
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+        int ans = bfs(strt,endd);
+        cout<<ans<<endl;
+        CLR(vis,0);
+        CLR(no,0);
+        CLR(strt,0);
+        CLR(endd,0);
+        CLR(forb,0);
     }
+
 }
-
-
 
 
 

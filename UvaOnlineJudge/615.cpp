@@ -164,100 +164,57 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+map<int,int>present;
+vector<int>all;
+map<int,int>in;
+int ind;
+vector<int>g[100005];
+int vis[100005];
+
+void check(int u){
+    if(!present[u]){
+        all.pb(u);
+        present[u] = ind;
+        //cout<<u<<" "<<ind<<endl;
+        ind++;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
+
+}
+
+void iner(int u){
+    //cout<<"in"<<u<<endl;
+    if(!in[u]){
+        in[u] = 1;
     }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
+    else {
+        in[u] = 2;
     }
-    p[u] = findP(p[u]);
-    return p[u];
 }
 
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
+void dfs(int u,int p){
+    //pr(u);
+    //pr(present[u]);
+    //cout<<" #\n";
+    vis[u] = 1;
+    for(int i=0;i<g[u].size();i++){
+        int v = g[u][i];
+        if(vis[v]!= 1&&v!=p){
+            dfs(v,u);
         }
     }
-    return tot;
 }
 
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
+bool check1(){
+    for(int i=1;i<ind;i++){
+        if(vis[i] == 0) return false;
     }
     return true;
+
 }
 
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
-        }
-    }
-
-    return mnm;
+void clr(){
+    CLR(vis,0);
+    for(int i=0;i<=ind;i++) g[i].clear();
 }
 
 int main(){
@@ -265,38 +222,62 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+    int cas = 1;
+    int x,y;
+    while(cin>>x>>y){
+        if(x < 0 && y < 0) break;
+        all.clear();
+        present.clear();
+        in.clear();
+        ind = 1;
+        int fl = 0;
+        while(x>0&&y>0){
+            check(x);
+            check(y);
+            if(x!=y){
+                iner(y);
             }
             else
-                prl(ag);
+            fl = 1;
+            int u = present[x];
+            int v = present[y];
+            g[u].pb(v);
+            cin>>x>>y;
         }
-        else{
-            printf("No way\n");
+        int siz = all.size();
+        int root = 0;
+        int duel = 0;
+        int r = -1;
+        for(int i=0;i<siz;i++){
+            int u = all[i];
+            if(!in[u]){
+                root++;
+                r = present[u];
+                //cout<<u<<"///"<<endl;
+            }
+            else if(in[u] == 2){
+                duel++;
+
+            }
+            //cout<<u<<" "<<present[u]<<endl;
         }
+        //cout<<root<<" "<<duel<<" "<<fl<<endl;
+        if(root == 1){
+            dfs(r,r);
+        }
+        //cout<<r<<endl;
+        if( (root!=1||duel||fl == 1||check1()==false) && all.size()!=0){
+            cout<<"Case "<<cas<<" is not a tree."<<endl;
+        }
+        else {
+            cout<<"Case "<<cas<<" is a tree."<<endl;
+        }
+        clr();
+        cas++;
     }
+
 }
+
 
 
 

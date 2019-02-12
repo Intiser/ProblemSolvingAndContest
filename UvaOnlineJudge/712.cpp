@@ -1,6 +1,6 @@
 /***********Template Starts Here***********/
 //#include <bits/stdc++.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,100 +164,47 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+vector<int>seq;
+
+int arr[500];
+int tree[10000];
+
+int conv(char c){
+    return c - '0';
+}
+
+int val(int n){
+    int ret = 1;
+    while(n--) ret = ret * 2;
+    return ret;
+}
+
+void init(int s,int e,int ind){
+    if(s == e) {
+        tree[ind] = arr[s];
+        return ;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
+    int m = (s + e)/2;
+    init(s,m,2*ind);
+    init(m+1,e,2*ind+1);
+
+}
+
+int ok(string s,int pos,int siz,int ind){
+    if(pos == siz){
+        return tree[ind];
     }
-};
+    if(s[pos] == '0') return ok(s,pos+1,siz,2*ind);
+    else  return ok(s,pos+1,siz,2*ind+1);
 
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
+string take(string s,int n){
+    string nw;
+    FORL(i,0,n){
+        nw.push_back(s[seq[i]-1]);
     }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
-            }
-            else
-                mnm = MIN(mnm,ret);
-
-        }
-    }
-
-    return mnm;
+    return nw;
 }
 
 int main(){
@@ -265,37 +212,41 @@ int main(){
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
-    int n,m;
-    int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
+    int n;
+    int m;
+    string s;
+    int cas = 1;
+    int siz;
+    while(cin>>n){
+        if(n == 0)break;
+        seq.clear();
+        CLR(tree,0);
+        CLR(arr,0);
+        FORE(i,1,n){
+           cin>>s;
+           siz = s.size();
+           seq.pb(conv(s[siz-1]));
+        }
+        cin>>s;
+        siz = s.size();
+        FORL(i,0,siz){
+            arr[i+1] = s[i];
+        }
+        init(1,siz,1);
+        cin>>m;
+        string ans;
         FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+            cin>>s;
+            string r = take(s,n);
+            //cout<<"# "<<r<<" "<<n<<endl;
+            ans.push_back(ok(r,0,r.size(),1));
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
-        }
-        else{
-            printf("No way\n");
-        }
+        printf("S-Tree #%d:\n",cas);
+        cout<<ans<<endl<<endl;
+        cas++;
+
     }
+
 }
 
 

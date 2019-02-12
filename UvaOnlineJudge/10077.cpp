@@ -1,60 +1,214 @@
-#include<iostream>
-#include<stdio.h>
-#include<cmath>
+//#include <bits/stdc++.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <stack>
+#include <vector>
+#include <deque>
+#include <functional>
+#include <string>
+#include <iostream>
+#include <cctype>
+#include <set>
+#include <climits>
+#include <iomanip>
+#include <cassert>
+#include <sstream>
+
+#define pb push_back
+#define nl puts ("")
+#define sp printf ( " " )
+#define phl printf ( "hello\n" )
+#define ff first
+#define ss second
+#define POPCOUNT __builtin_popcountll
+#define RIGHTMOST __builtin_ctzll
+#define LEFTMOST(x) (63-__builtin_clzll((x)))
+#define MP make_pair
+#define CLR(x,y) memset(x,y,sizeof(x))
+#define UNIQUE(V) (V).erase(unique((V).begin(),(V).end()),(V).end())
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#define NUMDIGIT(x,y) (((vlong)(log10((x))/log10((y))))+1)
+#define SQ(x) ((x)*(x))
+#define ABS(x) ((x)<0?-(x):(x))
+#define FABS(x) ((x)+eps<0?-(x):(x))
+#define ALL(x) (x).begin(),(x).end()
+#define LCM(x,y) (((x)/gcd((x),(y)))*(y))
+#define SZ(x) ((vlong)(x).size())
+#define NORM(x) if(x>=mod)x-=mod;
+#define MOD(x,y) (((x)*(y))%mod)
+#define ODD(x) (((x)&1)==0?(0):(1))
 
 using namespace std;
 
-double eps = 0.0000000001;
 
-int main()
-{
-    freopen("in.txt","r",stdin);
-    freopen("out.txt","w",stdout);
-    double current,searching;
-    double RU,LU,RL,LL,CL,CU,m,n,i,EU,EL;
-    string result;
 
-    while(cin>>m>>n)
-    {
-       if(m==1&&n==1)
-        break;
+typedef long long vlong;
+typedef unsigned long long uvlong;
+typedef pair < vlong, vlong > pll;
+typedef vector<pll> vll;
+typedef vector<vlong> vl;
 
-           CU=1; CL=1; RL=0; RU=1; LL=1; LU=0,EU=m,EL=n;
-           searching=m/n;
-           current=CU/CL; i=0;
-           while(!(abs(CU-EU)<eps&&abs(CL-EL)<eps))
-            {
 
-               if(current<searching)
-                {
-                     LL=CL; LU=CU;
-                     CL=CL+RL; CU=CU+RU;
-                     result[i]='R';
-                    cout<<CU<<" "<<CL<<endl;
-                   printf("R");
-                }
-                else if(current>searching)
-                {
-                    RL=CL; RU=CU;
-                    CL=CL+LL; CU=CU+LU;
-                    result[i]='L';
-                      cout<<CU<<" "<<CL<<endl;
-                      printf("L");
-                }
-                else
-                {
-                break;
-                }
-
-                current=CU/CL;
-                i++;
-                cout<<" thik ase "<<endl;
-            }
-             printf("\n");
+const vlong inf = 1000000000;
+const double pi = 2 * acos ( 0.0 );
+const double eps = 1e-9;
 
 
 
-
+struct debugger{
+    template<typename T> debugger& operator , (const T& v){
+        cerr<<v<<" ";
+        return *this;
     }
+}dbg;
 
+
+inline vlong gcd ( vlong a, vlong b ) {
+    a = ABS ( a ); b = ABS ( b );
+    while ( b ) { a = a % b; swap ( a, b ); } return a;
 }
+
+vlong ext_gcd ( vlong A, vlong B, vlong *X, vlong *Y ){
+    vlong x2, y2, x1, y1, x, y, r2, r1, q, r;
+    x2 = 1; y2 = 0;
+    x1 = 0; y1 = 1;
+    for (r2 = A, r1 = B; r1 != 0; r2 = r1, r1 = r, x2 = x1, y2 = y1, x1 = x, y1 = y ) {
+        q = r2 / r1;
+        r = r2 % r1;
+        x = x2 - (q * x1);
+        y = y2 - (q * y1);
+    }
+    *X = x2; *Y = y2;
+    return r2;
+}
+
+inline vlong modInv ( vlong a, vlong m ) {
+    vlong x, y;
+    ext_gcd( a, m, &x, &y );
+    x %= m;
+    if ( x < 0 ) x += m; //modInv is never negative
+    return x;
+}
+
+inline vlong power ( vlong a, vlong p ) {
+    vlong res = 1, x = a;
+    while ( p ) {
+        if ( p & 1 ) res = ( res * x );
+        x = ( x * x ); p >>= 1;
+    }
+    return res;
+}
+
+inline vlong bigmod ( vlong a, vlong p, vlong m ) {
+    vlong res = 1 % m, x = a % m;
+    while ( p ) {
+        if ( p & 1 ) res = ( res * x ) % m;
+        x = ( x * x ) % m; p >>= 1;
+    }
+    return res;
+}
+
+
+/***********Extended****************/
+
+#define sc(x) scanf("%d",&x)
+#define scl(x) scanf("%lld",&x)
+#define scc(x,y) scanf("%d %d",&x,&y)
+#define sccl(x,y) scanf("%lld %lld",&x,&y)
+#define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
+#define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
+#define prc(c) printf("Case %d: ",c)
+#define prn(c) printf("Case #%d:\n",c)
+#define pr(c) printf("%d\n",c)
+#define prl(c) printf("%lld\n",c)
+#define FORL(x,y,z) for(int x = y ; x<z ; x++)
+#define FORE(x,y,z) for(int x = y ; x<=z; x++)
+#define ROFE(x,y,z) for(int x = y ; x>=z; x--)
+#define lli long long int
+//#define ahsan0045
+
+
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+
+/***********Template Ends Here***********/
+
+#define prmN 2000000
+/*
+int flag[prmN+10];
+int prime[prmN+10];
+int ind = 0;
+
+void sieve(){
+    flag[0] = 1;
+    flag[1] = 1;
+    for(int i=4;i<=prmN;i+=2) flag[i]++;
+    prime[0] = 2;
+    ind = 1;
+    for(int i=3;i<=prmN;i+=2){
+        if(!flag[i]){
+            prime[ind] = i;
+            ind++;
+            for(int j=i+i;j<=prmN;j+=i)
+                flag[j]++;
+        }
+    }
+    //cout<<ind<<endl;
+    //cout<<prime[0]<<endl;
+    //cout<<prime[1]<<endl;
+    //cout<<prime[2]<<endl;
+}
+*/
+/********************DONE***************/
+
+
+//#define ahsan0045
+
+
+int main(){
+    #ifdef ahsan0045
+        freopen("in.txt","r",stdin);
+        freopen("out.txt","w",stdout);
+    #endif // ahsan0045
+
+    lli a,b;
+    string s;
+    double t1,t2;
+    while( cin>>a>>b){
+            if(a == 1 && b == 1) break;
+            lli stx = 1;
+            lli sty  = 1;
+            lli leftx = 0;  lli rightx = 1;
+            lli lefty = 1;  lli righty = 0;
+            s.clear();
+            while(stx!=a || sty!=b){
+                t2 = (a*1.0 )/b; t1 = (stx*1.0)/ sty;
+                //cout<<t1<<" "<<t2<<endl;
+                if(t1 > t2){
+                    s.push_back('L');
+                    rightx = stx;
+                    righty = sty;
+                    stx += leftx;
+                    sty += lefty;
+
+
+                }
+                else if(t1 < t2) {
+                    s.push_back('R');
+                    leftx = stx;
+                    lefty = sty;
+                    stx += rightx;
+                    sty += righty;
+                }
+            }
+            cout<<s<<endl;
+    }
+}
+
+
+

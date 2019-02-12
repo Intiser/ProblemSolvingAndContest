@@ -1,6 +1,6 @@
 /***********Template Starts Here***********/
 //#include <bits/stdc++.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -134,8 +134,17 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 //#define ahsan0045
 
 
-//int dx[] = {-1,1,0,0};
-//int dy[] = {0,0,-1,1};
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+/*
+int dx[] = {-1,1,0,0};
+int dy[] = {0,0,-1,1};
+*/
+
+
 
 /***********Template Ends Here***********/
 /*
@@ -164,139 +173,68 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+lli dist[105][105];
+
+void init(){
+    FORE(i,0,100){
+        FORE(j,0,100)
+            dist[i][j] = 0;
+        dist[i][i] = 0;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
 }
 
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
+void floyd(int n){
+    FORE(k,0,n){
+        FORE(i,0,n){
 
+            FORE(j,0,n){
 
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
+                    dist[i][j] = MAX(dist[i][j],MIN(dist[i][k],dist[k][j]));
 
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
     }
 
-    return mnm;
 }
+
 
 int main(){
     #ifdef ahsan0045
         freopen("in.txt","r",stdin);
         freopen("out.txt","w",stdout);
     #endif
-    int t;
     int n,m;
     int a,b,c;
-    edge ed;
-    sc(t);
-    FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+    int cas = 1;
+    while(cin>>n>>m){
+        if(n==0 && m==0) break;
+        init();
+        FORL(i,0,m){
+            cin>>a>>b>>c;
+            dist[a][b] = c-1;
+            dist[b][a] = c-1;
+
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
-            }
-            else
-                prl(ag);
+        floyd(n);
+        printf("Scenario #%d\n",cas); cas++;
+        cin>>a>>b>>c;
+        printf("Minimum Number of Trips = ");
+        if(a == b){
+            printf("1\n\n");
         }
-        else{
-            printf("No way\n");
+        else {
+            //cout<<dist[a][b]<<endl;
+            lli val = ceil( (c * 1.0) / dist[a][b]);
+            //cout<<val<<endl;
+            printf("%lld\n\n", val);
         }
+
+
     }
+
 }
+
+
 
 
 

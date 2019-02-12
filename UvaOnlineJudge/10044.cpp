@@ -124,7 +124,7 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
 #define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prn(c) printf("Case #%d:\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,101 +164,54 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
+map<string,int>indx;
+int ind;
+
+vector<int>con;
+
+int check(string s){
+    if(!indx[s]){
+        indx[s] = ind;
+        ind++;
+    }
+    return indx[s];
+}
+
+struct node{
     int u;
-    int v;
-    lli w;
-    edge(){
-    }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
+    int step;
 };
 
+lli dist[10050];
+vector<int>g[10050];
+int vis[10050];
 
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
-}
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
-
-int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
-    p[u] = findP(p[u]);
-    return p[u];
-}
-
-void Union(int u ,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    p[pv] = pu;
-}
-
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
-        }
-    }
-    return tot;
-}
-
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
-
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void bfs(int u){
+    dist[u] = 0;
+    queue<node>q;
+    node no;
+    no.u = u;
+    no.step = 0;
+    q.push(no);
+    vis[u] = 1;
+    node nw;
+    while(!q.empty()){
+        no = q.front();
+        q.pop();
+        int u = no.u;
+        for(int i=0;i<g[u].size();i++){
+            int v = g[u][i];
+            if(vis[v] == 0){
+                vis[v] = 1;
+                nw.u = v;
+                nw.step = no.step + 1;
+                dist[v] = nw.step;
+                q.push(nw);
             }
-            else
-                mnm = MIN(mnm,ret);
-
         }
     }
-
-    return mnm;
 }
+
 
 int main(){
     #ifdef ahsan0045
@@ -268,37 +221,80 @@ int main(){
     int t;
     int n,m;
     int a,b,c;
-    edge ed;
+    string s;
+    string nm;
     sc(t);
     FORE(cas,1,t){
         scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
-        }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+        ind = 1;
+        indx.clear();
+        check("Erdos, P.");
+        cin.ignore();
+        FORE(j,1,n){
+            getline(cin,s);
+            con.clear();
+            int siz = s.size();
+            int cm = 0;
+            int fl = 0;
+            int v = 0;
+            nm.clear();
+            for(int i=0;i<siz;i++){
+                if(s[i]==':'){
+                     v = check(nm);
+                     //cout<<nm<<" "<<v<<endl;
+                      cm = 0;
+                      fl = 0;
+                      nm.clear();
+                      con.push_back(v);
+                      break;
+                }
+                else if( (s[i]==',' && cm == 1 ) ){
+                      v = check(nm);
+                      //cout<<nm<<" "<<v<<endl;
+                      cm = 0;
+                      fl = 0;
+                      nm.clear();
+                      con.push_back(v);
+                }
+                else if(fl == 1){
+                    nm.push_back(s[i]);
+                    if(s[i] == ',') cm++;
+                }
+                else if(s[i]!=' '){
+                    fl = 1;
+                    nm.push_back(s[i]);
+                }
+
             }
+            int sizc = con.size();
+            FORL(i,0,sizc)
+                FORL(k,i+1,sizc){
+                   int x = con[i];
+                   int y = con[k];
+                    g[x].pb(y);
+                    g[y].pb(x);
+                }
+
+        }
+        FORE(i,0,ind+1) dist[i] = inf;
+        CLR(vis,0);
+        bfs(1);
+        printf("Scenario %d\n",cas);
+        FORL(i,0,m){
+            getline(cin,s);
+            int u = check(s);
+            if(dist[u]!=inf)
+            cout<<s<<" "<<dist[u]<<endl;
             else
-                prl(ag);
+            cout<<s<<" infinity"<<endl;
         }
-        else{
-            printf("No way\n");
+        FORE(i,0,ind+1){
+            g[i].clear();
         }
+
     }
+
 }
-
-
 
 
 

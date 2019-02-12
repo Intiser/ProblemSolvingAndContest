@@ -123,8 +123,8 @@ inline vlong bigmod ( vlong a, vlong p, vlong m ) {
 #define sccl(x,y) scanf("%lld %lld",&x,&y)
 #define sccc(x,y,z) scanf("%d %d %d",&x,&y,&z)
 #define scccl(x,y,z) scanf("%lld %lld %lld",&x,&y,&z)
-#define prc(c) printf("Case #%d : ",c)
-#define prn(c) printf("Case %d:\n",c)
+#define prc(c) printf("Case #%d: ",c)
+#define prn(c) printf("Case #%d\n",c)
 #define pr(c) printf("%d\n",c)
 #define prl(c) printf("%lld\n",c)
 #define FORL(x,y,z) for(int x = y ; x<z ; x++)
@@ -164,101 +164,72 @@ void sieve(){
 */
 /********************DONE***************/
 
-struct edge{
-    int u;
-    int v;
-    lli w;
-    edge(){
+int mxm;
+int freq[100];
+vector<int>g[105];
+int vis[105];
+int p[105];
+int r[105];
+
+void init(){
+    FORE(i,1,100){
+        p[i] = i; r[i] = 1;
     }
-    bool operator < (edge e) const {
-        return e.w > w;
-    }
-};
-
-
-int fl[1005];
-int p[1005];
-vector<edge>all;
-vector<int>org;
-
-void clr(){
-    CLR(fl,0);
-    CLR(p,0);
-    all.clear();
-    org.clear();
 }
-
-void par(){
-    FORE(i,0,101) p[i] = i;
-}
-
 
 int findP(int u){
-    if(p[u] == u){
-        return u;
-    }
+    if(p[u] == u) return u;
     p[u] = findP(p[u]);
     return p[u];
 }
 
-void Union(int u ,int v){
+void Union(int u,int v){
     int pu = findP(u);
     int pv = findP(v);
-    p[pv] = pu;
+    if(pu == pv) return ;
+    if(r[pu] > r[pv]){
+        r[pu] =+ r[pv];
+        p[pv] = pu;
+    }
+    else {
+        r[pv] =+ r[pu];
+        p[pu] = pv;
+    }
 }
 
-bool check(int u,int v){
-    int pu = findP(u);
-    int pv = findP(v);
-    if(pu == pv) return true;
-    return false;
-}
-
-
-lli mst(int x){
-    int siz = all.size();
-    par();
-    lli tot = 0;
-    for(int i=0;i<siz;i++){
-        if(i==x) continue;
-        int a = all[i].u;
-        int b = all[i].v;
-        if(check(a,b) == false){
-            Union(a,b);
-            tot = tot + all[i].w;
-            if(x== -1) org.pb(i);
+void dfss(int u){
+    if(vis[u]) return;
+    vis[u] = 1;
+    for(int i=0;i<g[u].size();i++){
+        int v = g[u][i];
+        if(!vis[v]){
+            dfss(v);
         }
     }
-    return tot;
 }
 
-bool isIt(int n){
-    int rt = findP(1);
-    for(int i=2;i<=n;i++){
-        int r = findP(i);
-        if(rt !=  r) return false;
-    }
-    return true;
-}
 
-lli renall(lli mn,int n){
-    int siz = org.size();
-    int mnm = -1;
-    for(int i=0;i<siz;i++){
-        int a = org[i];
-        lli ret = mst(a);
-        if(isIt(n)){
-            if(mnm == -1 ){
-                if(mn<=ret) mnm = ret;
+void dfs(int u){
+    //cout<<u<<" # "<<g[u].size()<<endl;
+    for(int i=0;i<g[u].size();i++){
+        int v = g[u][i];
+        //cout<<v<<endl;
+        if(v!=0){
+            g[u][i] = 0;
+            for(int j=0;j<g[v].size();j++){
+                int uu = g[v][j];
+                if(uu == u && uu!= 0){
+                    g[v][j] = 0;
+                    break;
+                }
             }
-            else
-                mnm = MIN(mnm,ret);
+            cout<<u<<" "<<v<<endl;
+            dfs(v);
 
         }
     }
-
-    return mnm;
 }
+
 
 int main(){
     #ifdef ahsan0045
@@ -267,36 +238,59 @@ int main(){
     #endif
     int t;
     int n,m;
-    int a,b,c;
-    edge ed;
+    int a,b;
+    int u;
+    int v;
     sc(t);
     FORE(cas,1,t){
-        scc(n,m);
-        clr();
-        FORE(i,1,m){
-            sccc(a,b,c);
-            ed.u = a;
-            ed.v = b;
-            ed.w = c;
-            all.pb(ed);
+        init();
+        sc(n);
+        mxm = 0;
+        FORE(i,1,n){
+            scc(a,b);
+            g[a].pb(b);
+            g[b].pb(a);
+            freq[a]++;
+            freq[b]++;
+            mxm = MAX(mxm,MAX(a,b));
+            Union(a,b);
         }
-        sort(all.begin(),all.end());
-        lli mn = mst(-1);
-        //cout<<mn<<endl;
-        prc(cas);
-        if(isIt(n)==true){
-            lli ag = renall(mn,n);
-            if(ag == -1){
-                printf("No second way\n");
+
+
+
+        int fl = 0;
+        int st = 0;
+        FORE(i,1,mxm){
+            if(freq[i]) st = i;
+
+            if(freq[i]%2 == 1 ){
+                fl = 1;
             }
-            else
-                prl(ag);
+
+
+            freq[i] = 0;
+        }
+
+        FORE(i,1,mxm){
+            if(freq[i]){
+                int pi  = findP(i);
+                int pst = findP(st);
+                if(pi != pst) fl = 1;
+            }
+        }
+        prn(cas);
+        //cout<<st<<" "<<mxm<<endl;
+        if(fl == 0){
+            dfs(st);
         }
         else{
-            printf("No way\n");
+            cout<<"some beads may be lost"<<endl;
         }
+        if(cas<t) printf("\n");
+        FORE(i,1,mxm) g[i].clear();
     }
 }
+
 
 
 
